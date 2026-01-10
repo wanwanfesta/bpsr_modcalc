@@ -604,9 +604,13 @@ with tab_register:
 
                 module["s3"] = None if s3 == "" else s3
                 module["v3"] = None if v3 == "0" else v3
+            
 
+          
             # ▼ 削除ボタン
-            if st.button("このモジュールを削除", key=f"delete_{i}"):
+            col_del_left, col_del_right = st.columns([1, 0.25])
+            with col_del_right:
+             if st.button("✕ 削除", key=f"delete_{i}"):
                 del modules[i]
                 st.session_state["modules"] = modules
                 save_to_local_storage("modules_data", json.dumps(modules))
