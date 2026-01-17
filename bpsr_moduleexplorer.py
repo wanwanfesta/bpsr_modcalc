@@ -410,7 +410,7 @@ with tab_optimize:
                 v = m.get(v_key)
                 if s and v:
                     v_int = int(v)
-                    agg[s] = min(agg.get(s, 0) + v_int, 20)
+                    agg[s] = agg.get(s, 0) + v_int
         return agg
 
     # ▼ モジュールのステータス文字列
@@ -669,3 +669,4 @@ with tab_register:
 
         except Exception as e:
             st.error("JSON の読み込みに失敗しました。")
+
