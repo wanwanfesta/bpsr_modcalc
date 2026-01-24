@@ -494,6 +494,13 @@ with tab_optimize:
 with tab_register:
 
     st.subheader("モジュール倉庫（自動保存されません）")
+    st.markdown(
+    '<a href="https://docs.google.com/spreadsheets/d/1sQOyxh46OnNera2yMkagimaa7D_KRKjhWLdUmgfWFEw/edit?gid=0#gid=0" target="_blank" style="text-decoration:none;">'
+    '<button style="padding:8px 16px; font-size:16px;">📄 スプレッドシートを開く</button>'
+    '</a>',
+    unsafe_allow_html=True
+)
+
 
     # ---------------------------------------------------------
     # LocalStorage から復元
@@ -635,38 +642,55 @@ with tab_register:
         save_to_local_storage("modules_data", json.dumps(modules))
         st.rerun()
 
-    # ---------------------------------------------------------
-    # JSON 保存（手動バックアップ）
+    # --------------------------------------------------------- 
+    # CSV 読み込み（倉庫に追加） 
     # ---------------------------------------------------------
     st.write("---")
-    st.subheader("📦 JSON バックアップ")
+    if "csv_processed" not in st.session_state:
+        st.session_state["csv_processed"] = False
+    uploaded_csv = st.file_uploader("📤 CSVを読み込んで倉庫に追加", type="csv")
 
-    json_data = json.dumps(modules, ensure_ascii=False, indent=2)
-    st.download_button(
-        label="📥 モジュール情報をJSONとして保存",
-        data=json_data,
-        file_name="modules_backup.json",
-        mime="application/json"
-    )
+if uploaded_csv is not None and not st.session_state["csv_processed"]:
+    try:
+        df = pd.read_csv(uploaded_csv, header=1)
 
-    # ---------------------------------------------------------
-    # JSON 読み込み（復元）※二重実行防止版
-    # ---------------------------------------------------------
-    uploaded_json = st.file_uploader("📤 JSONを読み込んで復元", type="json")
+        new_modules = []
+        for _, row in df.iterrows():
+            name = row.get("モジュール名（変更可）", "")
+            if not isinstance(name, str) or name.strip() == "":
+                continue  # モジュール名が空ならスキップ
 
-    if "json_loaded" not in st.session_state:
-        st.session_state["json_loaded"] = False
+            # ▼ 効果・数値がすべて空ならスキップ
+            has_effect = any([
+                pd.notna(row.get("効果1")),
+                pd.notna(row.get("効果2")),
+                pd.notna(row.get("効果3")),
+                pd.notna(row.get("数値1")),
+                pd.notna(row.get("数値2")),
+                pd.notna(row.get("数値3")),
+            ])
+            if not has_effect:
+                continue
 
-    if uploaded_json is not None and not st.session_state["json_loaded"]:
-        try:
-            loaded = json.load(uploaded_json)
-            st.session_state["modules"] = loaded
-            save_to_local_storage("modules_data", json.dumps(loaded))
+            new_modules.append({
+                "name": name,
+                "s1": row.get("効果1") if pd.notna(row.get("効果1")) else None,
+                "v1": str(int(row.get("数値1"))) if pd.notna(row.get("数値1")) else None,
+                "s2": row.get("効果2") if pd.notna(row.get("効果2")) else None,
+                "v2": str(int(row.get("数値2"))) if pd.notna(row.get("数値2")) else None,
+                "s3": row.get("効果3") if pd.notna(row.get("効果3")) else None,
+                "v3": str(int(row.get("数値3"))) if pd.notna(row.get("数値3")) else None,
+            })
 
-            st.session_state["json_loaded"] = True
-            st.success("JSON を読み込み、モジュールを復元しました！")
-            st.rerun()
+        modules.extend(new_modules)
+        st.session_state["modules"] = modules
+        save_to_local_storage("modules_data", json.dumps(modules))
 
-        except Exception as e:
-            st.error("JSON の読み込みに失敗しました。")
+        st.success(f"CSV から {len(new_modules)} 件のモジュールを追加しました！")
+        st.session_state["csv_processed"] = True
+        st.session_state["uploaded_csv"] = None
+        st.rerun()
 
+
+    except Exception as e:
+        st.error("CSV の読み込みに失敗しました。形式を確認してください。")
