@@ -493,7 +493,18 @@ with tab_optimize:
 # =========================================================
 with tab_register:
 
-    st.subheader("モジュール倉庫（自動保存されません）")
+    st.subheader("モジュール倉庫")
+    st.markdown("""
+    <div style="font-size:13px; font-weight:normal; line-height:1.5;">
+    ☆登録の仕方☆<br>
+    1. スプレッドシートを開く<br>
+    2. モジュール内容を記入して CSV ファイルとしてダウンロード<br>
+    3. 下の CSV 読み込み欄にダウンロードしたファイルをドラッグ＆ドロップ<br>
+    <br>
+    ※手動での登録も可能ですが、ブラウザ更新時にリセットされます。
+    </div>
+    """, unsafe_allow_html=True)
+
     st.markdown(
     '<a href="https://docs.google.com/spreadsheets/d/1sQOyxh46OnNera2yMkagimaa7D_KRKjhWLdUmgfWFEw/edit?gid=0#gid=0" target="_blank" style="text-decoration:none;">'
     '<button style="padding:8px 16px; font-size:16px;">📄 スプレッドシートを開く</button>'
