@@ -493,7 +493,6 @@ with tab_optimize:
 # =========================================================
 with tab_register:
 
-    st.subheader("モジュール倉庫")
     st.markdown("""
     <div style="font-size:13px; font-weight:normal; line-height:1.5;">
     ☆登録の仕方☆<br>
@@ -705,3 +704,4 @@ if uploaded_csv is not None and not st.session_state["csv_processed"]:
 
     except Exception as e:
         st.error("CSV の読み込みに失敗しました。形式を確認してください。")
+
